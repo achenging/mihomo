@@ -67,15 +67,17 @@ func (d *Direct) IsL3Protocol(metadata *C.Metadata) bool {
 func NewDirectWithOption(option DirectOption) *Direct {
 	return &Direct{
 		Base: &Base{
-			name:   option.Name,
-			tp:     C.Direct,
-			pdName: option.ProviderName,
-			udp:    true,
-			tfo:    option.TFO,
-			mpTcp:  option.MPTCP,
-			iface:  option.Interface,
-			rmark:  option.RoutingMark,
-			prefer: option.IPVersion,
+			name:        option.Name,
+			tp:          C.Direct,
+			pdName:      option.ProviderName,
+			udp:         true,
+			tfo:         option.TFO,
+			mpTcp:       option.MPTCP,
+			iface:       option.Interface,
+			rmark:       option.RoutingMark,
+			prefer:      option.IPVersion,
+			dns64Prefix: option.DNS64Prefix,
+			dns64Start:  option.DNS64Start,
 		},
 		loopBack: loopback.NewDetector(),
 	}

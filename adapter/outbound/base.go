@@ -25,19 +25,21 @@ type ProxyAdapter interface {
 }
 
 type Base struct {
-	name   string
-	addr   string
-	tp     C.AdapterType
-	pdName string
-	udp    bool
-	xudp   bool
-	tfo    bool
-	mpTcp  bool
-	iface  string
-	rmark  int
-	prefer C.DNSPrefer
-	dialer C.Dialer
-	id     string
+	name        string
+	addr        string
+	tp          C.AdapterType
+	pdName      string
+	udp         bool
+	xudp        bool
+	tfo         bool
+	mpTcp       bool
+	iface       string
+	rmark       int
+	prefer      C.DNSPrefer
+	dialer      C.Dialer
+	id          string
+	dns64Prefix string
+	dns64Start  int
 }
 
 // Name implements C.ProxyAdapter
@@ -143,6 +145,13 @@ func (b *Base) DialOptions() (opts []dialer.Option) {
 		opts = append(opts, dialer.WithMPTCP(true))
 	}
 
+	if b.dns64Prefix != "" {
+		opts = append(opts, dialer.WithDNS64Prefix(b.dns64Prefix))
+	}
+	if b.dns64Start != 0 {
+		opts = append(opts, dialer.WithDNS64Start(b.dns64Start))
+	}
+
 	return opts
 }
 
@@ -169,6 +178,8 @@ type BasicOption struct {
 	IPVersion   C.DNSPrefer `proxy:"ip-version,omitempty"`
 	DialerProxy string      `proxy:"dialer-proxy,omitempty"` // don't apply this option into groups, but can set a group name in a proxy
 
+	DNS64Prefix string `proxy:"dns64-prefix,omitempty"`
+	DNS64Start  int    `proxy:"dns64-start,omitempty"`
 	//
 	// The following parameters are used internally, assign value by the structure decoder are disallowed
 	//
@@ -189,30 +200,34 @@ func (b *BasicOption) NewDialer(opts []dialer.Option) C.Dialer {
 }
 
 type BaseOption struct {
-	Name        string
-	Addr        string
-	Type        C.AdapterType
-	UDP         bool
-	XUDP        bool
-	TFO         bool
-	MPTCP       bool
-	Interface   string
-	RoutingMark int
-	Prefer      C.DNSPrefer
+	Name             string
+	Addr             string
+	Type             C.AdapterType
+	UDP              bool
+	XUDP             bool
+	TFO              bool
+	MPTCP            bool
+	Interface        string
+	RoutingMark      int
+	Prefer           C.DNSPrefer
+	DNS64Prefix      string
+	DNS64PrefixStart int
 }
 
 func NewBase(opt BaseOption) *Base {
 	return &Base{
-		name:   opt.Name,
-		addr:   opt.Addr,
-		tp:     opt.Type,
-		udp:    opt.UDP,
-		xudp:   opt.XUDP,
-		tfo:    opt.TFO,
-		mpTcp:  opt.MPTCP,
-		iface:  opt.Interface,
-		rmark:  opt.RoutingMark,
-		prefer: opt.Prefer,
+		name:        opt.Name,
+		addr:        opt.Addr,
+		tp:          opt.Type,
+		udp:         opt.UDP,
+		xudp:        opt.XUDP,
+		tfo:         opt.TFO,
+		mpTcp:       opt.MPTCP,
+		iface:       opt.Interface,
+		rmark:       opt.RoutingMark,
+		prefer:      opt.Prefer,
+		dns64Prefix: opt.DNS64Prefix,
+		dns64Start:  opt.DNS64PrefixStart,
 	}
 }
 

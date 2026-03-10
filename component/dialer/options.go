@@ -35,6 +35,8 @@ type option struct {
 	mpTcp         bool
 	resolver      resolver.Resolver
 	netDialer     NetDialer
+	dns64Prefix   string
+	dns64Start    int
 }
 
 type Option func(opt *option)
@@ -106,6 +108,17 @@ func WithMPTCP(mpTcp bool) Option {
 func WithNetDialer(netDialer NetDialer) Option {
 	return func(opt *option) {
 		opt.netDialer = netDialer
+	}
+}
+
+func WithDNS64Prefix(dns64Prefix string) Option {
+	return func(opt *option) {
+		opt.dns64Prefix = dns64Prefix
+	}
+}
+func WithDNS64Start(start int) Option {
+	return func(opt *option) {
+		opt.dns64Start = start
 	}
 }
 

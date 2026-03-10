@@ -16,6 +16,7 @@ import (
 	"github.com/metacubex/mihomo/component/keepalive"
 	"github.com/metacubex/mihomo/component/mptcp"
 	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/log"
 )
 
 const (
@@ -49,7 +50,6 @@ func DialContext(ctx context.Context, network, address string, options ...Option
 
 		network = fmt.Sprintf("%s%d", network, opt.network)
 	}
-
 	ips, port, err := parseAddr(ctx, network, address, opt.resolver)
 	if err != nil {
 		return nil, err
@@ -122,9 +122,15 @@ func ListenPacket(ctx context.Context, network, address string, rAddrPort netip.
 
 func dialContext(ctx context.Context, network string, destination netip.Addr, port string, opt option) (net.Conn, error) {
 	var address string
-	destination, port = resolver.LookupIP4P(destination, port)
-	address = net.JoinHostPort(destination.String(), port)
-
+	//TODO
+	if opt.dns64Prefix != "" && opt.dns64Start != 0 {
+		address = resolver.Dns64Convert(destination.String(), opt.dns64Prefix, opt.dns64Start)
+		address = net.JoinHostPort(address, port)
+		log.Infoln("[dns64] %s:%s ->%s\n", destination.String(), port, address)
+	} else {
+		destination, port = resolver.LookupIP4P(destination, port)
+		address = net.JoinHostPort(destination.String(), port)
+	}
 	netDialer := opt.netDialer
 	switch netDialer.(type) {
 	case nil:
